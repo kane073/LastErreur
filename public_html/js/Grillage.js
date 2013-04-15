@@ -955,6 +955,8 @@ function Grillage(idDiv) {
                 for (i = retenu.length - 1; i >= 0; i--) {
                     ecrireDansUneCellule(caseRetenue[caseRetenue.length - 1 - i].x, caseRetenue[caseRetenue.length - 1 - i].y, String(retenu[retenu.length - 1-i], "black"));
                 }
+                
+                
                 break;
 
         }
