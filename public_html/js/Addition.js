@@ -11,9 +11,9 @@
 function Addition() {
     var listArgument = arguments;
     var operande = [];
-    var retenues = [];
+    var retenues = [0];
     var resultat = new Nombre(0);
-    
+
     /**
      * Crèe des types Nombres et les mets dans l'atribut operande
      * @returns {nothing}
@@ -36,7 +36,7 @@ function Addition() {
      * @returns {Boolean}
      */
     function verifieNumbreArgument() {
-        if (listArgument.length >= 2 && listArgument.length <= 10) {
+        if (listArgument.length >= 2 && listArgument.length <= 7) {
             return true;
         } else {
             alert("Le nombre d'opérande doit étre compris entre 2 et 10.");
@@ -52,9 +52,9 @@ function Addition() {
         var i = 0;
         var reponse = true;
         while (i < listArgument.length && reponse === true) {
-            if (operande[i].getLongueurValeur() > 18 || operande[i].getLongueurValeur() < 1) {
+            if (operande[i].getLongueurValeur() > 15 || operande[i].getLongueurValeur() < 1) {
                 reponse = false;
-                alert("L'un des arguments est supérieur à 18 caractères!");
+                alert("L'un des arguments est supérieur à 15 caractères!");
             }
             i++;
         }
@@ -96,115 +96,142 @@ function Addition() {
         this.resoudreAddition = function resoudreAddition() {
             var MaxPartieEntiere = longueurMaxPartieEntiere();
             var MaxPartieDecimale = longueurMaxPartieDecimale();
-            var tableauTemporel = [];
-            var resultatTemporelPartieEntiere = [];
-            var resultatTemporelPartieDecimale = [];
+            var matriceOprerande = [];
 
-            /**
-             * 
-             */
-            for (i = 0; i < MaxPartieDecimale; i++) {
-                for (j = 0; j < operande.length; j++) {
-                    if (operande[j].getPartieDecimale().length < MaxPartieDecimale) {
-                        tmp = MaxPartieDecimale - operande[j].getPartieDecimale().length;
-                        if (i >= operande[j].getPartieDecimale().length) {
-                            if (resultatTemporelPartieDecimale[i]) {
-                                resultatTemporelPartieDecimale[i] = operande[j].getPartieDecimaleByIndice(i) + resultatTemporelPartieDecimale[i];
-
-                            } else {
-                                if (!operande[j].getPartieDecimaleByIndice(i) === 0) {
-                                    resultatTemporelPartieDecimale.push(operande[j].getPartieDecimaleByIndice(i));
-                                }
-                            }
+            for (i = 0; i < operande.length; i++) {
+                var tmpPartieDecimal = [];
+                if (operande[i].getPartieDecimale().length < MaxPartieDecimale) {
+                    for (j = 0; j < MaxPartieDecimale; j++) {
+                        if (j < operande[i].getPartieDecimale().length) {
+                            tmpPartieDecimal.push(parseInt(operande[i].getPartieDecimale()[j]));
                         } else {
-                            if (resultatTemporelPartieDecimale[i]) {
-                                resultatTemporelPartieDecimale[i] = operande[j].getPartieDecimaleByIndice(i) + resultatTemporelPartieDecimale[i];
-                            } else {
-                                resultatTemporelPartieDecimale.push(operande[j].getPartieDecimaleByIndice(i))
-                            }
-                        }
-                    } else {
-                        if (resultatTemporelPartieDecimale[i]) {
-                            resultatTemporelPartieDecimale[i] = operande[j].getPartieDecimaleByIndice(i) + resultatTemporelPartieDecimale[i];
-                        } else {
-                            resultatTemporelPartieDecimale.push(operande[j].getPartieDecimaleByIndice(i))
+                            tmpPartieDecimal.push(0);
                         }
                     }
-
                 }
+                else {
+                    tmpPartieDecimal = operande[i].getPartieDecimale();
+                }
+                var tmpPartieEntiere = [];
+                if (operande[i].getPartieEntiere().length < MaxPartieEntiere) {
+                    for (j = 0; j < MaxPartieEntiere; j++) {
+                        if (j < operande[i].getPartieEntiere().length) {
+                            tmpPartieEntiere.push(parseInt(operande[i].getPartieEntiere()[j]));
+                        } else {
+                            tmpPartieEntiere.unshift(0);
+                        }
+                    }
+                } else {
+                    tmpPartieEntiere = operande[i].getPartieEntiere();
+                }
+                matriceOprerande.push({entiere: tmpPartieEntiere, decimal: tmpPartieDecimal});
             }
 
-            var derniereRetenue = 0;
-            retenues.unshift(0);
-            for (i = (resultatTemporelPartieDecimale.length - 1); i >= 0; i--) {
-                if (String(resultatTemporelPartieDecimale[i]).length === 1) {
-                    tableauTemporel.unshift(resultatTemporelPartieDecimale[i]);
+            var tmpSomme = [];
+            var tmp = 0;
+            for (j = MaxPartieDecimale - 1; j >= 0; j--) {
+                tmp = 0;
+                for (i = 0; i < matriceOprerande.length; i++) {
+                    tmp = tmp + matriceOprerande[i].decimal[j];
+                }
+                tmpSomme.unshift(tmp);
+            }
+            var taille;
+            var p;
+            var f;
+            var diff = 0;
+            for (i = tmpSomme.length - 1; i >= 0; i--) {
+                taille = String(tmpSomme[i]).length;
+                if (taille > 1) {
+                    p = String(tmpSomme[i])[taille - 1];
+                    f = String(tmpSomme[i]).substring(0, taille - 1);
+                    tmpSomme[i] = parseInt(p);
+                    if (i <= 0) {
+                        retenues.unshift("");
+                        tmpSomme.unshift(".");
+                        tmpSomme.unshift(parseInt(f));
+                        retenues.unshift(parseInt(f));
+                    } else {
+                        tmpSomme[i - 1] = tmpSomme[i - 1] + parseInt(f);
+                        retenues.unshift(parseInt(f));
+                    }
+                } else {
                     retenues.unshift(0);
                 }
-                if(i==String(resultatTemporelPartieDecimale[i]).length){
-                    retenues.unshift(".");
+            }
+            if (tmpSomme.length > 0) {
+                diff = tmpSomme.length - 1;
+            } else {
+                diff;
+            }
+            
+            var retenueDepart = 0;
+            if (retenues[0]) {
+                retenueDepart = retenues[0];
+            }
+
+            for (j = MaxPartieEntiere - 1; j >= 0; j--) {
+                tmp = 0;
+                for (i = 0; i < matriceOprerande.length; i++) {
+                    tmp = tmp + matriceOprerande[i].entiere[j];
                 }
-                if (String(resultatTemporelPartieDecimale[i]).length > 1) {
-                    tableauTemporel.unshift(parseInt(String(resultatTemporelPartieDecimale[i])[1]) + derniereRetenue);
-                    derniereRetenue = parseInt(String(resultatTemporelPartieDecimale[i])[0]);
-                    retenues.unshift(derniereRetenue);
+                if (j === MaxPartieEntiere - 1) {
+                    if (tmpSomme[0]) {
+                        tmpSomme[0] = tmp + retenueDepart;
+                    } else {
+                        tmpSomme.unshift(tmp + retenueDepart);
+                    }
+                } else {
+                    tmpSomme.unshift(tmp);
                 }
             }
             
-            var resultatDecimal = tableauTemporel.join("");
-
-            /**
-             * 
-             */
-
-            for (i = 0; i < MaxPartieEntiere; i++) {
-                for (j = 0; j < operande.length; j++) {
-                    if (operande[j].getPartieEntiere().length < MaxPartieEntiere) {
-                        tmp = MaxPartieEntiere - operande[j].getPartieEntiere().length;
-                        if (i >= tmp) {
-                            if (resultatTemporelPartieEntiere[i]) {
-                                resultatTemporelPartieEntiere[i] = operande[j].getPartieEntiereByIndice(i - tmp) + resultatTemporelPartieEntiere[i];
-                            } else {
-                                resultatTemporelPartieEntiere.push(operande[j].getPartieEntiereByIndice(i - tmp))
+            for (i = tmpSomme.length - diff - 1; i >= 0; i--) {
+                taille = String(tmpSomme[i]).length;
+                if (taille > 1) {
+                    p = String(tmpSomme[i])[taille - 1];
+                    f = String(tmpSomme[i]).substring(0, taille - 1);
+                    tmpSomme[i] = parseInt(p);
+                    if (f.length <= 1) {
+                        if (i <= 0) {
+                            tmpSomme.unshift(parseInt(f));
+                            retenues.unshift(parseInt(f));
+                        } else {
+                            tmpSomme[i - 1] = tmpSomme[i - 1] + parseInt(f);
+                            retenues.unshift(parseInt(f));
+                        }
+                    } else {
+                        sf = f.substring(0, f.length - 1);
+                        if (i <= 0) {
+                            tmpSomme.unshift(parseInt(f));
+                            retenues.unshift(parseInt(f));
+                            if (f.length > 1) {
+                                for (z = 0; z < f.length; z++) {
+                                    if (tmpSomme[i]) {
+                                        tmpSomme[i] = parseInt(f[z + f.length - 1]);
+                                    } else {
+                                        tmpSomme.unshift(parseInt(f[f.length - z - 1]));
+                                        retenues.unshift(parseInt(f[f.length - z - 1]));
+                                    }
+                                }
                             }
-                        }
-                    } else {
-                        if (resultatTemporelPartieEntiere[i]) {
-                            resultatTemporelPartieEntiere[i] = operande[j].getPartieEntiereByIndice(i) + resultatTemporelPartieEntiere[i];
                         } else {
-                            resultatTemporelPartieEntiere.push(operande[j].getPartieEntiereByIndice(i))
+                            tmpSomme[i - 1] = tmpSomme[i - 1] + parseInt(f);
+                            retenues.unshift(parseInt(f));
                         }
                     }
-                }
-            }
-            resultatTemporelPartieEntiere[resultatTemporelPartieEntiere.length - 1] += retenues[0];
-            tableauTemporel = [];
-            var derniereRetenue = 0;
-            for (i = (resultatTemporelPartieEntiere.length - 1); i >= 0; i--) {
-                if (String(resultatTemporelPartieEntiere[i]).length === 1) {
+                } else {
                     if (i !== 0) {
-                        tableauTemporel.unshift(resultatTemporelPartieEntiere[i]);
                         retenues.unshift(0);
-                    } else {
-                        if (String(resultatTemporelPartieEntiere[i] + derniereRetenue).length > 1) {
-                            tableauTemporel.unshift(parseInt(String(resultatTemporelPartieEntiere[i] + derniereRetenue)[1]));
-                            derniereRetenue = parseInt(String(resultatTemporelPartieEntiere[i] + derniereRetenue)[0]);
-                            tableauTemporel.unshift(derniereRetenue);
-                            retenues.unshift(derniereRetenue);
-                        } else {
-                            tableauTemporel.unshift(resultatTemporelPartieEntiere[i] + derniereRetenue);
-                        }
                     }
                 }
-                if (String(resultatTemporelPartieEntiere[i]).length > 1) {
-                    tableauTemporel.unshift(parseInt(String(resultatTemporelPartieEntiere[i])[1]) + derniereRetenue);
-                    derniereRetenue = parseInt(String(resultatTemporelPartieEntiere[i])[0]);
-                    retenues.unshift(derniereRetenue);
-                }
             }
-
-            var resultatEntier = tableauTemporel.join("");
-            resultat = new Nombre(parseFloat(resultatEntier + "." + resultatDecimal));
+            
+            var valCreateResultat="";
+            for(i=0;i<tmpSomme.length;i++){
+                valCreateResultat+=String(tmpSomme[i]);
+            }
+            resultat = new Nombre(parseFloat(valCreateResultat));
 
         };
 
@@ -225,7 +252,7 @@ function Addition() {
         this.getOperande = function getOperande() {
             return operande;
         };
-        
+
     }
 }
 

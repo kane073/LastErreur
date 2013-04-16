@@ -395,7 +395,11 @@ function Grillage(idDiv) {
         contextCanvasGrille.fillStyle = "#fff";
         contextCanvasGrille.fillRect(x, y, 30, 30);
     }
-
+    function EffacerLesDonneeCellule(x, y) {
+        contextCanvasGrille.clearRect(x, y, 30, 30);
+        contextCanvasGrille.fillStyle = "#fff";
+        contextCanvasGrille.fillRect(x, y, 30, 30);
+    }
     function dessinerBaseOperation(x, y, couleur) {
 
         contextCanvasGrille.lineWidth = 4;
@@ -630,7 +634,6 @@ function Grillage(idDiv) {
                 document.onkeydown = function(event) {
                     //On appelle la fonction clavier qui nous retourne un Object(intKeyCode,intAltKey,intCtrlKey,val,type)
                     var donnekey = clavier(event);
-                    console.log(donnekey);
                     /**
                      * Selon la categorie on realise des actions
                      */
@@ -947,16 +950,40 @@ function Grillage(idDiv) {
                 var retenu = operation.getRetenues();
                 var resultat = operation.getResultat();
                 var caseRetenue = [];
+                var caseResultat = [];
                 for (j = 0; j < TableauDesCelluleReserver.length; j++) {
                     if (TableauDesCelluleReserver[j].ligne === 1) {
-                        caseRetenue.push({x: TableauDesCelluleReserver[j].x, y: TableauDesCelluleReserver[j].y})
+                        caseRetenue.push({x: TableauDesCelluleReserver[j].x, y: TableauDesCelluleReserver[j].y});
                     }
+                    if (TableauDesCelluleReserver[j].ligne === (operation.getOperande().length + 3)) {
+                        caseResultat.push({x: TableauDesCelluleReserver[j].x, y: TableauDesCelluleReserver[j].y});
+
+                    }
+
                 }
                 for (i = retenu.length - 1; i >= 0; i--) {
-                    ecrireDansUneCellule(caseRetenue[caseRetenue.length - 1 - i].x, caseRetenue[caseRetenue.length - 1 - i].y, String(retenu[retenu.length - 1-i], "black"));
+                    ecrireDansUneCelluleAvecTransparance(caseRetenue[caseRetenue.length - 1 - i].x, caseRetenue[caseRetenue.length - 1 - i].y, String(retenu[retenu.length - 1 - i]), "#C03000", "rgba(173, 207, 79, 0.3)");
                 }
-                
-                
+
+                tailleMax = resultat.getPartieEntiere().length + resultat.getPartieDecimale().length + 1;
+                v = resultat.getPartieDecimale().length - 1;
+                u = resultat.getPartieEntiere().length - 1;
+                for (i = caseResultat.length - 1; i >= 0; i--) {
+                    if (v >= 0) {
+                        ecrireDansUneCelluleAvecTransparance(caseResultat[i].x, caseResultat[i].y, String(resultat.getPartieDecimale()[v]), "#C03000", "rgba(173, 207, 79, 0.3)");
+                        v--;
+                    }
+                    if (v === -1) {
+                        ecrireDansUneCelluleAvecTransparance(caseResultat[i - 1].x, caseResultat[i - 1].y, String(","), "red", "rgba(173, 207, 79, 0.3)");
+                        v = -2;
+                    }
+                    if (v === -2 && u >= 0) {
+                        ecrireDansUneCelluleAvecTransparance(caseResultat[i-2].x, caseResultat[i-2].y, String(resultat.getPartieEntiere()[u]), "#C03000", "rgba(173, 207, 79, 0.3)");
+                        u--;
+                    }
+                }
+
+
                 break;
 
         }
